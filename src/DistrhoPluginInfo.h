@@ -7,7 +7,7 @@
 #define DISTRHO_PLUGIN_DESCRIPTION "Ubiquitous SF2 Plugin"
 #define DISTRHO_PLUGIN_HOMEPAGE "https://github.com/atsushieno/usf2plugin"
 #define DISTRHO_PLUGIN_URI DISTRHO_PLUGIN_HOMEPAGE
-#define DISTRHO_PLUGIN_LICENSE "https://github.com/atsushieno/usf2/tree/master/LICENSE.md"
+#define DISTRHO_PLUGIN_LICENSE "https://github.com/atsushieno/usf2/tree/main/LICENSE"
 #define DISTRHO_PLUGIN_UNIQUE_ID USF2
 
 #define DISTRHO_PLUGIN_CLAP_ID "dev.atsushieno.usf2plugin"
