@@ -1,0 +1,12 @@
+[submodule "dpfwebui"]
+	path = external/dpfwebui
+	url = https://github.com/lucianoiam/dpfwebui
+[submodule "DPF"]
+	path = external/DPF
+	url = https://github.com/DISTRHO/DPF
+[submodule "external/sf2hpp"]
+	path = external/sf2hpp
+	url = https://github.com/AnonN10/sf2hpp
+[submodule "external/GeneralUser-GS"]
+	path = external/GeneralUser-GS
+	url = https://github.com/mrbumpy409/GeneralUser-GS.git

@@ -1,0 +1,28 @@
+#pragma once
+
+#define DISTRHO_PLUGIN_BRAND "atsushieno"
+#define DISTRHO_PLUGIN_MAKER "atsushieno"
+#define DISTRHO_PLUGIN_NAME "USF2Plugin"
+#define DISTRHO_PLUGIN_LABEL "USF2Plugin"
+#define DISTRHO_PLUGIN_DESCRIPTION "Ubiquitous SF2 Plugin"
+#define DISTRHO_PLUGIN_HOMEPAGE "https://github.com/atsushieno/usf2plugin"
+#define DISTRHO_PLUGIN_URI DISTRHO_PLUGIN_HOMEPAGE
+#define DISTRHO_PLUGIN_LICENSE "https://github.com/atsushieno/usf2/tree/master/LICENSE.md"
+#define DISTRHO_PLUGIN_UNIQUE_ID USF2
+
+#define DISTRHO_PLUGIN_CLAP_ID "dev.atsushieno.usf2plugin"
+#define DISTRHO_PLUGIN_CLAP_FEATURES "synth"
+#define DISTRHO_PLUGIN_VST3_CATEGORIES "Synth"
+
+#define DISTRHO_PLUGIN_HAS_UI 1
+#define DISTRHO_UI_WEB_VIEW 1
+//#define DISTRHO_UI_CUSTOM_INCLUDE_PATH "../external/dpf/distrho/extra/WebView.hpp"
+//#define DISTRHO_UI_CUSTOM_WIDGET_TYPE "..."
+#define DISTRHO_UI_DEFAULT_WIDTH 640
+#define DISTRHO_UI_DEFAULT_HEIGHT 400
+
+#define DISTRHO_PLUGIN_IS_RT_SAFE 1
+#define DISTRHO_PLUGIN_NUM_INPUTS 0
+#define DISTRHO_PLUGIN_NUM_OUTPUTS 2
+#define DISTRHO_PLUGIN_WANT_STATE 1
+#define DISTRHO_PLUGIN_WANT_MIDI_INPUT 1
