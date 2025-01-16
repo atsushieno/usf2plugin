@@ -22,9 +22,9 @@ FetchContent_MakeAvailable(tinysoundfont)
 #### DPF
 
 dpf_add_plugin(UbiquitousSF2Plugin
-    TARGETS clap jack lv2 vst3
+    TARGETS clap jack lv2 vst3 au
     FILES_DSP
-        src/PluginProcessor.cpp
+        src/Usf2Plugin.cpp
         src/GeneralUser-GS.cpp
         src/SF2Application.cpp
     FILES_UI

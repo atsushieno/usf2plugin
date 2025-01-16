@@ -9,6 +9,7 @@
 #define DISTRHO_PLUGIN_URI DISTRHO_PLUGIN_HOMEPAGE
 #define DISTRHO_PLUGIN_LICENSE "https://github.com/atsushieno/usf2/tree/main/LICENSE"
 #define DISTRHO_PLUGIN_UNIQUE_ID USF2
+#define DISTRHO_PLUGIN_BRAND_ID AENO
 
 #define DISTRHO_PLUGIN_CLAP_ID "dev.atsushieno.usf2plugin"
 #define DISTRHO_PLUGIN_CLAP_FEATURES "synth"
