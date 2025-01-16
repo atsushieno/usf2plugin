@@ -35,7 +35,8 @@ namespace usf2 {
         float global_gain{1.0};
         std::vector<std::unique_ptr<SF2Entry>> sf2_entries{16};
         std::vector<tsf*> tsfs{16};
-        tsf* channels[16];
+        std::atomic<tsf*> channels[16];
+        std::atomic<int32_t> preset_indices[16];
 
     public:
         static tsf* gugs() {
@@ -47,6 +48,7 @@ namespace usf2 {
         SF2Application() = default;
 
         void initialize() {
+            memset(preset_indices, 0, sizeof(preset_indices));
             sampleRate(sample_rate); // initialize
             mapChannelToSF2(0, -1);
         }
@@ -79,8 +81,13 @@ namespace usf2 {
         void mapChannelToSF2(uint8_t channel, int32_t sf2Index) {
             auto tsf = sf2Index >= 0 ? soundfonts()[sf2Index] : gugs();
             channels[channel] = tsf;
-            // FIXME: this 48 is only for testing
-            tsf_channel_set_presetindex(tsf, channel, 48);
+            tsf_channel_set_presetindex(tsf, channel, preset_indices[channel]);
+        }
+
+        // FIXME: it should not be supported like this...
+        void programChangeHack(int32_t index) {
+            preset_indices[0] = index;
+            tsf_channel_set_presetindex(channels[0], 0, index);
         }
 
         void process(float* outputL, float* outputR, uint32_t size, const MidiEvent* midiEvents, uint32_t midiEventCount) {
@@ -91,17 +98,17 @@ namespace usf2 {
                 auto ch = e.data[0] & 0xF;
                 switch (e.data[0] & 0xF0) {
                     case 0x80:
-                        tsf_note_off(channels[ch], 48, e.data[1]);
+                        tsf_note_off(channels[ch], preset_indices[ch], e.data[1]);
                         break;
                     case 0x90:
-                        tsf_note_on(channels[ch], 48, e.data[1], e.data[2] / 127.0);
+                        tsf_note_on(channels[ch], preset_indices[ch], e.data[1], e.data[2] / 127.0);
                         break;
                     case 0xB0:
                         tsf_channel_midi_control(channels[ch], ch, e.data[1], e.data[2]);
                         break;
                     case 0xC0:
                         // FIXME: drums
-                        tsf_channel_set_presetindex(channels[ch], ch, e.data[1]);
+                        tsf_channel_set_bank_preset(channels[ch], ch, e.data[1], 0);
                         break;
                     case 0xE0:
                         tsf_channel_set_pitchwheel(channels[ch], ch, e.data[1] * 0x80 + e.data[2]);
