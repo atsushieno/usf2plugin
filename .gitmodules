@@ -4,9 +4,15 @@
 [submodule "DPF"]
 	path = external/DPF
 	url = https://github.com/DISTRHO/DPF
-[submodule "external/sf2hpp"]
-	path = external/sf2hpp
-	url = https://github.com/AnonN10/sf2hpp
 [submodule "external/GeneralUser-GS"]
 	path = external/GeneralUser-GS
 	url = https://github.com/mrbumpy409/GeneralUser-GS.git
+[submodule "external/TinySoundFont"]
+	path = external/TinySoundFont
+	url = https://github.com/schellingb/TinySoundFont
+[submodule "external/tsf"]
+	path = external/tsf
+	url = https://github.com/firodj/tsf
+[submodule "external/cmidi2"]
+	path = external/cmidi2
+	url = https://github.com/atsushieno/cmidi2

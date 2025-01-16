@@ -1,7 +1,6 @@
 #pragma once
 
 #include "distrho/DistrhoPlugin.hpp"
-#include "sf2.hpp"
 #include "SF2Application.h"
 
 namespace usf2 {
