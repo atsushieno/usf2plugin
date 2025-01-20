@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(UbiquitousSF2Plugin)
+project(USF2Plugin)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -21,8 +21,8 @@ FetchContent_MakeAvailable(tinysoundfont)
 
 #### DPF
 
-dpf_add_plugin(UbiquitousSF2Plugin
-    TARGETS clap jack lv2 vst3 au
+dpf_add_plugin(USF2Plugin
+    TARGETS clap lv2 vst3 au
     FILES_DSP
         src/Usf2Plugin.cpp
         src/GeneralUser-GS.cpp
@@ -30,6 +30,7 @@ dpf_add_plugin(UbiquitousSF2Plugin
     FILES_UI
         src/PluginUI.cpp
     UI_TYPE webview
+    USE_WEB_VIEW true
 )
 
 include_directories(
@@ -41,3 +42,16 @@ include_directories(
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
 )
+
+foreach (USF2_DST_DIR "vst3" "component" "lv2" "clap")
+if(APPLE)
+    file(INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/src/index.html"
+            DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/bin/${PROJECT_NAME}.${USF2_DST_DIR}/Contents/Resources/"
+    )
+else()
+    # FIXME: verify on all platforms
+    file(INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/src/index.html"
+            DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/bin/${PROJECT_NAME}.${USF2_DST_DIR}"
+    )
+endif()
+endforeach()
