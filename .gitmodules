@@ -4,9 +4,6 @@
 [submodule "DPF"]
 	path = external/DPF
 	url = https://github.com/DISTRHO/DPF
-[submodule "external/GeneralUser-GS"]
-	path = external/GeneralUser-GS
-	url = https://github.com/mrbumpy409/GeneralUser-GS.git
 [submodule "external/TinySoundFont"]
 	path = external/TinySoundFont
 	url = https://github.com/schellingb/TinySoundFont
