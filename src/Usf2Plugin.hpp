@@ -2,15 +2,23 @@
 
 #include "distrho/DistrhoPlugin.hpp"
 #include "SF2Application.h"
+#include "Usf2EditControllerWebServer.h"
 
 namespace usf2 {
 
     class Usf2Plugin : public DISTRHO::Plugin {
         SF2Application sf2{};
+        Usf2WebUIServer web_server{};
 
     public:
         Usf2Plugin() : Plugin(/*parameterCount*/130 * 16, /*programCount*/128, /*stateCount*/0) {
             sf2.initialize();
+            auto bp = getBundlePath();
+            auto bundlePath = bp ? std::string{bp} : "";
+#if __APPLE__
+            bundlePath = std::format("{}/Contents/Resources", bundlePath);
+#endif
+            web_server.initialize(bundlePath);
         }
         ~Usf2Plugin() override = default;
 

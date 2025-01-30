@@ -19,6 +19,20 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(tinysoundfont)
 
+FetchContent_Declare(
+        choc
+        GIT_REPOSITORY https://github.com/Tracktion/choc/
+        GIT_TAG 6dfac9fec70eae9159e64dc55538d40a2171175e
+)
+FetchContent_MakeAvailable(choc)
+
+FetchContent_Declare(
+        webaudio-controls
+        GIT_REPOSITORY https://github.com/g200kg/webaudio-controls
+        GIT_TAG c4dc6d2b31c196867e57853e7281eb7303d4f6ba
+)
+FetchContent_MakeAvailable(webaudio-controls)
+
 #### DPF
 
 dpf_add_plugin(USF2Plugin
@@ -27,6 +41,7 @@ dpf_add_plugin(USF2Plugin
         src/Usf2Plugin.cpp
         src/GeneralUser-GS.cpp
         src/SF2Application.cpp
+        src/Usf2EditControllerWebServer.cpp
     FILES_UI
         src/PluginUI.cpp
     UI_TYPE webview
@@ -37,21 +52,49 @@ include_directories(
         src
         external/DPF
         ${tinysoundfont_SOURCE_DIR}
+        ${cpp-httplib_SOURCE_DIR}
+        ${choc_SOURCE_DIR}
 )
 
-target_link_libraries(${PROJECT_NAME}
-        PRIVATE
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL CONFIG REQUIRED)
+
+include_directories(
+        ${OPENSSL_INCLUDE_DIR}
 )
+
+target_link_libraries(USF2Plugin
+        PUBLIC
+        ${OPENSSL_LIBRARIES}
+)
+
+# Prepare web content files
+add_custom_target(build-web-content
+        npm install
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/src/web
+)
+add_dependencies(${PROJECT_NAME} build-web-content)
 
 foreach (USF2_DST_DIR "vst3" "component" "lv2" "clap")
-if(APPLE)
-    file(INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/src/index.html"
-            DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/bin/${PROJECT_NAME}.${USF2_DST_DIR}/Contents/Resources/"
+    if(APPLE)
+        set(USF2_RES_DIR_SUB "/Contents/Resources")
+    endif()
+    file(MAKE_DIRECTORY
+            ${CMAKE_CURRENT_BINARY_DIR}/bin/${PROJECT_NAME}.${USF2_DST_DIR}${USF2_RES_DIR_SUB}
     )
-else()
-    # FIXME: verify on all platforms
-    file(INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/src/index.html"
-            DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/bin/${PROJECT_NAME}.${USF2_DST_DIR}"
+    file(CREATE_LINK
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/web
+            ${CMAKE_CURRENT_BINARY_DIR}/bin/${PROJECT_NAME}.${USF2_DST_DIR}${USF2_RES_DIR_SUB}/web
+            COPY_ON_ERROR
+            SYMBOLIC
     )
-endif()
+    file(INSTALL
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/index.html
+            DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/${PROJECT_NAME}.${USF2_DST_DIR}${USF2_RES_DIR_SUB}
+    )
+    file(INSTALL
+            ${webaudio-controls_SOURCE_DIR}/webaudio-controls.js
+            ${webaudio-controls_SOURCE_DIR}/webcomponents-lite.js
+            DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/${PROJECT_NAME}.${USF2_DST_DIR}${USF2_RES_DIR_SUB}/web
+    )
 endforeach()
