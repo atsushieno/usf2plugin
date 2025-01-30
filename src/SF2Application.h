@@ -4,7 +4,9 @@
 #include "tsf.h"
 #include <string>
 #include <filesystem>
-#include "GeneralUser-GS.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 namespace usf2 {
 
@@ -37,17 +39,30 @@ namespace usf2 {
         std::vector<tsf*> tsfs{16};
         std::atomic<tsf*> channels[16];
         std::atomic<int32_t> preset_indices[16];
+        std::string bundle_path{};
+        tsf* sf{nullptr};
 
     public:
-        static tsf* gugs() {
-            static int32_t pos;
-            static tsf* sf = tsf_load_memory(GeneralUser_GS_GeneralUser_GS_sf2(), GS_GeneralUser_GS_sf2_len);
+        tsf* gugs() {
+            if (bundle_path.empty())
+                return tsf_load_memory("", 0);
+            if (!sf) {
+                auto path = std::format("{}/{}", bundle_path, "GeneralUser-GS.sf2");
+                auto fs = std::ifstream(path);
+                std::ostringstream ss;
+                ss << fs.rdbuf();
+                auto s = ss.str();
+                sf = tsf_load_memory(s.data(), s.size());
+            }
             return sf;
         }
 
         SF2Application() = default;
 
-        void initialize() {
+        void initialize(std::string& bundlePath) {
+            if (bundlePath.empty())
+                return;
+            bundle_path = bundlePath;
             memset(preset_indices, 0, sizeof(preset_indices));
             sampleRate(sample_rate); // initialize
             mapChannelToSF2(0, -1);

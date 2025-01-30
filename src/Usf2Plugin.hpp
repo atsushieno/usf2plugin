@@ -12,12 +12,12 @@ namespace usf2 {
 
     public:
         Usf2Plugin() : Plugin(/*parameterCount*/130 * 16, /*programCount*/128, /*stateCount*/0) {
-            sf2.initialize();
             auto bp = getBundlePath();
             auto bundlePath = bp ? std::string{bp} : "";
 #if __APPLE__
-            bundlePath = std::format("{}/Contents/Resources", bundlePath);
+            bundlePath = bp ? std::format("{}/Contents/Resources", bundlePath) : "";
 #endif
+            sf2.initialize(bundlePath);
             web_server.initialize(bundlePath);
         }
         ~Usf2Plugin() override = default;
