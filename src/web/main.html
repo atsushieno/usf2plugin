@@ -9,6 +9,7 @@
   <script type="module" src="./node_modules/@colinaut/action-table/dist/index.js"></script>
   <!-- not available at npmjs.com ... -->
   <script type="text/javascript" src="webaudio-controls.js"></script>
+  <script type="text/javascript" src="./DPF.js" defer="true"></script>
   <script type="text/javascript" src="./App.js" defer="true"></script>
   <style>
     body { font-family: var(--sl-font-sans); }
@@ -18,12 +19,19 @@
       border-bottom: 1px solid var(--sl-color-primary-100);
       border-right: 1px solid var(--sl-color-primary-200);
     }
+    td.program-list-item:hover { background-color: burlywood; }
   </style>
 
   <title>Ubiquitous SF2 Plugin</title>
 </head>
 <body>
-<h1>Ubiquitous SF2 Plugin</h1>
+
+<sl-details summary="Program List" id="program-list">
+  <table>
+    <tbody id="program-list-tbody">
+    </tbody>
+  </table>
+</sl-details>
 
 <webaudio-keyboard class="plugin-midi-keyboard" width="640" height="80" keys="80"></webaudio-keyboard>
 
