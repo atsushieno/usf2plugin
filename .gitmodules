@@ -1,9 +1,6 @@
 [submodule "dpfwebui"]
 	path = external/dpfwebui
 	url = https://github.com/lucianoiam/dpfwebui
-[submodule "DPF"]
-	path = external/DPF
-	url = https://github.com/DISTRHO/DPF
 [submodule "external/TinySoundFont"]
 	path = external/TinySoundFont
 	url = https://github.com/schellingb/TinySoundFont

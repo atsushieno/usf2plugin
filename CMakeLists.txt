@@ -6,8 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 include(cmake/CPM.cmake)
 
-add_subdirectory(external/DPF)
-
 #### Externals
 
 include(FetchContent)
@@ -15,9 +13,15 @@ include(FetchContent)
 FetchContent_Declare(
         tinysoundfont
         GIT_REPOSITORY https://github.com/atsushieno/TinySoundFont
-        GIT_TAG        994c5c86e6e61cd8f0fced0dc628dbedcef7ca6d
+        GIT_TAG        c70079590c06a70a357628a86ac055f5ca529de7
 )
 FetchContent_MakeAvailable(tinysoundfont)
+FetchContent_Declare(
+        dpf
+        GIT_REPOSITORY https://github.com/DISTRHO/DPF
+        GIT_TAG        4238e1c7f0351bbe488d79f0899c540543ac7583
+)
+FetchContent_MakeAvailable(dpf)
 FetchContent_Declare(
         choc
         GIT_REPOSITORY https://github.com/Tracktion/choc/
