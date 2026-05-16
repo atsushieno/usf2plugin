@@ -3,15 +3,30 @@
 #include "distrho/DistrhoPlugin.hpp"
 #include "SF2Application.h"
 #include "Usf2EditControllerWebServer.h"
+#include "memory/choc_Base64.h"
 
 namespace usf2 {
 
     class Usf2Plugin : public DISTRHO::Plugin {
-        SF2Application sf2{};
+        mutable SF2Application sf2{};
         Usf2WebUIServer web_server{};
 
     public:
-        Usf2Plugin() : Plugin(/*parameterCount*/130 * 16, /*programCount*/128, /*stateCount*/0) {
+        // Parameter layout: stride 256 per channel.
+        //   local  0–127 : CC 0–127
+        //   local    128 : Channel Pressure
+        //   local    129 : Program Change
+        //   local    130 : Pitch Bend  (raw 14-bit, 0–16383, center 8192)
+        //   local 131–255: hidden padding (keeps channel blocks power-of-2 aligned)
+        // Total: 15×256 + 131 = 3971
+        static constexpr uint32_t kParamStride    = 256;
+        static constexpr uint32_t kParamPerCh     = 131; // real params per channel
+        static constexpr uint32_t kParamTotal     = 15 * kParamStride + kParamPerCh; // 3971
+
+        static uint8_t  paramChannel(uint32_t index) { return (uint8_t)(index / kParamStride); }
+        static uint32_t paramLocal  (uint32_t index) { return index % kParamStride; }
+
+        Usf2Plugin() : Plugin(/*parameterCount*/kParamTotal, /*programCount*/128, /*stateCount*/1) {
             auto bp = getBundlePath();
             auto bundlePath = bp ? std::string{bp} : "";
 #if __APPLE__
@@ -168,32 +183,80 @@ namespace usf2 {
             sf2.programChangeHack(index);
         }
 
-        void initParameter(uint32_t index, DISTRHO::Parameter &parameter) override {
-            DISTRHO::Plugin::initParameter(index, parameter);
-            // DPF assigns "CC"s for CAf and pitch bend, but their names are left awkward. We fix them here.
-            switch (index % 130) {
-                case 128:
-                    parameter.name = String{std::format("Channel {} Channel Pressure", index / 130 + 1).data()};
-                    break;
-                case 129:
-                    parameter.name = String{std::format("Channel {} Pitch Bend", index / 130 + 1).data()};
-                    break;
+        void initParameter(uint32_t index, DISTRHO::Parameter& parameter) override {
+            uint8_t  ch    = paramChannel(index);
+            uint32_t local = paramLocal(index);
+
+            if (local >= kParamPerCh) {
+                // Padding slots — hidden from host UI.
+                parameter.hints = kParameterIsHidden;
+                parameter.name  = String("-");
+                parameter.ranges.min = 0.0f;
+                parameter.ranges.max = 1.0f;
+                parameter.ranges.def = 0.0f;
+                return;
+            }
+
+            parameter.hints = kParameterIsAutomatable;
+            parameter.ranges.min = 0.0f;
+
+            if (local < 129) { // CC 0–127 and Channel Pressure
+                parameter.name  = local < 128
+                    ? String(std::format("Ch{} CC{}", ch + 1, local).c_str())
+                    : String(std::format("Ch{} Pressure", ch + 1).c_str());
+                parameter.ranges.max = 127.0f;
+                parameter.ranges.def = 0.0f;
+            } else if (local == 129) {
+                parameter.name  = String(std::format("Ch{} Program", ch + 1).c_str());
+                parameter.ranges.max = 127.0f;
+                parameter.ranges.def = 0.0f;
+            } else { // local == 130
+                parameter.name  = String(std::format("Ch{} PitchBend", ch + 1).c_str());
+                parameter.ranges.max = 16383.0f;
+                parameter.ranges.def = 8192.0f; // center
             }
         }
 
         void setParameterValue(uint32_t index, float value) override {
-            // FIXME: implement
+            uint8_t  ch    = paramChannel(index);
+            uint32_t local = paramLocal(index);
+
+            if (local >= kParamPerCh) return;
+
+            if (local < 129) {
+                auto u7 = (uint8_t)std::clamp(std::lround(value), 0L, 127L);
+                if (local < 128) sf2.setCC(ch, (uint8_t)local, u7);
+                else              sf2.setPressure(ch, u7);
+            } else if (local == 129) {
+                sf2.setProgram(ch, (uint8_t)std::clamp(std::lround(value), 0L, 127L));
+            } else {
+                sf2.setPitchBend(ch, (uint16_t)std::clamp(std::lround(value), 0L, 16383L));
+            }
         }
 
-        String getState(const char* statePropertyName) const override {
-            printf("getState invoked: %s\n", statePropertyName);
-            // FIXME: implement
+        void initState(uint32_t index, State& state) override {
+            if (index == 0) {
+                state.key          = "smf";
+                state.label        = "MIDI State (SMF)";
+                state.defaultValue = "";
+            }
+        }
+
+        String getState(const char* key) const override {
+            if (std::string_view{key} == "smf") {
+                auto smf     = sf2.serializeToSMF();
+                auto encoded = choc::base64::encodeToString(smf.data(), smf.size());
+                return String(encoded.c_str());
+            }
             return String();
         }
 
-        void setState(const char* statePropertyName, const char* value) override {
-            printf("setState invoked: %s : %s\n", statePropertyName, value);
-            // FIXME: implement
+        void setState(const char* key, const char* value) override {
+            if (std::string_view{key} == "smf" && value && *value) {
+                std::vector<uint8_t> smf;
+                if (choc::base64::decodeToContainer(smf, std::string_view{value}))
+                    sf2.deserializeFromSMF(smf);
+            }
         }
 
 

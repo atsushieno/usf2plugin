@@ -58,9 +58,8 @@ dpf_add_plugin(USF2Plugin
 
 include_directories(
         src
-        external/DPF
+        ${dpf_SOURCE_DIR}
         ${tinysoundfont_SOURCE_DIR}
-        ${cpp-httplib_SOURCE_DIR}
         ${choc_SOURCE_DIR}
 )
 
